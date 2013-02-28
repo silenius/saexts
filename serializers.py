@@ -82,7 +82,7 @@ class Serializer(object):
 
     def __init__(self, obj):
         self.obj = obj
-        self.mapper = orm.object_mapper(src)
+        self.mapper = orm.object_mapper(obj)
 
     def dict(self, encoder=BaseEncoder(), **kwargs):
         data = {}
