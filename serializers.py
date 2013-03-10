@@ -60,12 +60,12 @@ class BaseEncoder(object):
 class Serializer(object):
     """ Serialize an SQLAlchemy entity """
 
-    def __init__(self, src, **kwargs):
-        self.src = src
-        self.mapper = orm.object_mapper(src)
+    def __init__(self, obj):
+        self.obj = obj
+        self.mapper = orm.object_mapper(obj)
 
     def dict(self, encoder=BaseEncoder(), **kwargs):
-        data = dict()
+        data = {}
 
         include_columns = kwargs.get('include_columns')
         exclude_columns = kwargs.get('exclude_columns')
@@ -74,26 +74,26 @@ class Serializer(object):
         exclude_relations = kwargs.get('exclude_relations')
 
         if exclude_columns is None and include_columns is None:
-            raise ValueError('include_colums or exclude_columns required')
+            raise ValueError('You must specify either include_colums or '
+                             'exclude_columns')
 
         # Iterate on all MapperProperty objects.
         # A mapped column is represented as an instance of ColumnProperty and a
         # relationship() is represented as an instance of RelationshipProperty.
         for prop in self.mapper.iterate_properties:
-
             # An object attribute that corresponds to a table column 
             # Public constructor is the orm.column_property() function.
             if isinstance(prop, orm.properties.ColumnProperty) and\
             ((include_columns is True or prop.key in include_columns) or\
              (include_columns is None and prop.key not in exclude_columns)):
-                data[prop.key] = encoder(getattr(self.src, prop.key))
+                data[prop.key] = encoder(getattr(self.obj, prop.key))
 
             # An object property that holds a single item or list of items that
             # correspond to a related database table.
             elif isinstance(prop, orm.properties.RelationshipProperty) and\
-            ((include_relations == '*' or prop.key in include_relations) and\
-             (prop.key not in exclude_relations or exclude_relations != '*')):
-                obj = getattr(self.src, prop.key)
+            ((include_relations is True or prop.key in include_relations) or\
+             (include_columns is None and prop.key not in exclude_relations)):
+                obj = getattr(self.obj, prop.key)
 
                 # A many-to-many relationship (secondary=)
                 if isinstance(obj, orm.collections.InstrumentedList):
