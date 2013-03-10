@@ -33,14 +33,7 @@ class BaseEncoder(object):
 
     def __call__(self, value, *args, **kwargs):
         encoder = self.types_map.get(value.__class__, self.default)
-
-        if encoder:
-            return encoder(value, *args, **kwargs)
-        else:
-            for (cls, func) in self.types_map.iteritems():
-                if isinstance(value, cls):
-                    return func(value, *args, **kwargs)
-            return value
+        return encoder(value, *args, **kwargs) if encoder else value
 
     def from_datetime(self, value):
         return value.strftime(self.timestamp_format)
