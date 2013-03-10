@@ -23,7 +23,7 @@ class BaseEncoder(object):
             date : self.from_date,
             tuple : self.from_tuple,
             list : self.from_list,
-            dict : self.from_dict       
+            dict : self.from_dict
         }
 
         self.timestamp_format = timestamp_format
@@ -58,27 +58,7 @@ class BaseEncoder(object):
 
 
 class Serializer(object):
-    '''
-        - Seriliaze all columns:
-        Seriliazer(obj).dict(include_columns=True)
-            include_columns = True
-            exclude_columns = None
-
-        - Seriliaze without colums:
-        Serializer(obj).dict(exclude_columns=True)
-            include_columns = None
-            exclude_columns = True
-
-        - Serialize only those columns:
-        Serializer(obj).dict(include_columns=['id', 'title'])
-            include_columns = [ ... ]
-            exclude_columns = None
-
-        - Seriliaze all columns except 'foo' and 'bar':
-        Serializer(obj).dict(exclude_columns=['foo', 'bar'])
-            include_columns = None
-            exclude_columns = [ ... ]
-    '''
+    """ Serialize an SQLAlchemy entity """
 
     def __init__(self, src, **kwargs):
         self.src = src
@@ -92,7 +72,7 @@ class Serializer(object):
 
         include_relations = kwargs.get('include_relations')
         exclude_relations = kwargs.get('exclude_relations')
-        
+
         if exclude_columns is None and include_columns is None:
             raise ValueError('include_colums or exclude_columns required')
 
@@ -134,7 +114,7 @@ class Serializer(object):
         return json.dump(self.dict(encoder, **kwargs), fp) if fp else\
                json.dumps(self.dict(encoder, **kwargs))
 
-    def xml(self, encoder=PrimitiveStrExport(), fp=sys.stdout, **kwargs):
+    def xml(self, encoder=BaseEncoder(default=str), fp=sys.stdout, **kwargs):
 
         def _build_node(key, value, parent):
             elem = et.SubElement(parent, key)
