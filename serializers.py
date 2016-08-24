@@ -14,6 +14,7 @@ import xml.etree.ElementTree as et
 from datetime import datetime, date
 
 from sqlalchemy import orm
+from sqlalchemy.ext.hybrid import HYBRID_PROPERTY
 
 __all__ = ['Serializer']
 
@@ -81,11 +82,15 @@ class Serializer(object):
             raise ValueError('You must specify either include_relations or '
                              'exclude_relations')
 
+        for prop in self.mapper.all_orm_descriptors:
+            if prop.extension_type is HYBRID_PROPERTY:
+                data[prop.__name__] = getattr(self.obj, prop.__name__)
+
         # Iterate on all MapperProperty objects.
         # A mapped column is represented as an instance of ColumnProperty and a
         # relationship() is represented as an instance of RelationshipProperty.
         for prop in self.mapper.iterate_properties:
-            # An object attribute that corresponds to a table column 
+            # An object attribute that corresponds to a table column
             # Public constructor is the orm.column_property() function.
             if isinstance(prop, orm.properties.ColumnProperty) and\
             ((include_columns is True or (not include_columns in (None, False) and prop.key in include_columns)) or\
