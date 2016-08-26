@@ -12,9 +12,9 @@ requires = [
     'SQLAlchemy<1.1',
 ]
 
-setup(name='sautils',
+setup(name='saexts',
       version='0.1',
-      description='sautils',
+      description='saexts',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
         "Development Status :: 3 - Alpha",
@@ -26,7 +26,7 @@ setup(name='sautils',
         ],
       author='Julien Cigar',
       author_email='julien@perdition.city',
-      url='https://github.com/silenius/sautils',
+      url='https://github.com/silenius/saexts',
       keywords='sqlalchemy serialize',
       packages=find_packages(),
       include_package_data=True,
