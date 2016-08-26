@@ -84,7 +84,7 @@ class Serializer(object):
 
         for prop in self.mapper.all_orm_descriptors:
             if prop.extension_type is HYBRID_PROPERTY:
-                data[prop.__name__] = getattr(self.obj, prop.__name__)
+                data[prop.__name__] = encoder(getattr(self.obj, prop.__name__))
 
         # Iterate on all MapperProperty objects.
         # A mapped column is represented as an instance of ColumnProperty and a
