@@ -9,7 +9,7 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
 requires = [
-    'SQLAlchemy<1.1',
+    'SQLAlchemy<1.2',
 ]
 
 setup(name='saexts',
