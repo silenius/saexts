@@ -8,6 +8,7 @@
 # think this stuff is worth it, you can buy me a beer in return.
 
 import json
+import logging
 import sys
 import xml.etree.ElementTree as et
 
@@ -16,7 +17,10 @@ from datetime import datetime, date
 from sqlalchemy import orm
 from sqlalchemy.ext.hybrid import HYBRID_PROPERTY
 
+log = logging.getLogger(__name__)
+
 __all__ = ['Serializer']
+
 
 
 class BaseEncoder(object):
@@ -55,7 +59,7 @@ class BaseEncoder(object):
     from_tuple = from_list = _from_iterable
 
     def from_dict(self, value):
-        return {k: self.__call__(v) for (k, v) in value.iteritems()}
+        return {k: self.__call__(v) for (k, v) in value.items()}
 
 
 class Serializer(object):
@@ -75,8 +79,7 @@ class Serializer(object):
         exclude_relations = kwargs.get('exclude_relations')
 
         if exclude_columns is None and include_columns is None:
-            raise ValueError('You must specify either include_colums or '
-                             'exclude_columns')
+            include_columns = '*'
 
         if exclude_relations is None and include_relations is None:
             raise ValueError('You must specify either include_relations or '
@@ -131,7 +134,7 @@ class Serializer(object):
             elem = et.SubElement(parent, key)
 
             if isinstance(value, dict):
-                for (k, v) in value.iteritems():
+                for (k, v) in value.items():
                     _build_node(k, v, elem)
             elif isinstance(value, (list, tuple, set, frozenset)):
                 for (cpt, item) in enumerate(value):
@@ -141,7 +144,7 @@ class Serializer(object):
 
         root = et.Element('content')
 
-        for (key, value) in self.dict(encoder, **kwargs).iteritems():
+        for (key, value) in self.dict(encoder, **kwargs).items():
             _build_node(key, value, root)
 
         tree = et.ElementTree(root)
