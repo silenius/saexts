@@ -87,15 +87,16 @@ class Serializer(object):
 
         for prop in self.mapper.all_orm_descriptors:
             if prop.extension_type is HYBRID_PROPERTY:
-                data[prop.__name__] = encoder(getattr(self.obj, prop.__name__))
+                if hasattr(prop, 'index'):
+                    key = prop.index
+                else:
+                    key = prop.__name__
 
-        # Iterate on all MapperProperty objects.
-        # A mapped column is represented as an instance of ColumnProperty and a
-        # relationship() is represented as an instance of RelationshipProperty.
-        for prop in self.mapper.iterate_properties:
+                data[key] = encoder(prop.fget(self.obj))
+
             # An object attribute that corresponds to a table column
             # Public constructor is the orm.column_property() function.
-            if isinstance(prop, orm.properties.ColumnProperty) and\
+            elif isinstance(prop, orm.properties.ColumnProperty) and\
             ((include_columns is True or (not include_columns in (None, False) and prop.key in include_columns)) or\
              (include_columns is None and (exclude_columns is not None and prop.key not in exclude_columns))):
                 data[prop.key] = encoder(getattr(self.obj, prop.key))

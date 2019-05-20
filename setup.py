@@ -13,7 +13,7 @@ requires = [
 ]
 
 setup(name='saexts',
-      version='0.1.1',
+      version='0.1.2',
       description='saexts',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
