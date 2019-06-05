@@ -16,6 +16,7 @@ from datetime import datetime, date
 
 from sqlalchemy import orm
 from sqlalchemy.ext.hybrid import HYBRID_PROPERTY
+from sqlalchemy.ext.associationproxy import AssociationProxy
 
 log = logging.getLogger(__name__)
 
@@ -93,35 +94,39 @@ class Serializer(object):
                     key = prop.__name__
 
                 data[key] = encoder(prop.fget(self.obj))
+            elif isinstance(prop, AssociationProxy):
+                pass
+            else:
+                prop = prop.prop
 
-            # An object attribute that corresponds to a table column
-            # Public constructor is the orm.column_property() function.
-            elif isinstance(prop, orm.properties.ColumnProperty) and\
-            ((include_columns is True or (not include_columns in (None, False) and prop.key in include_columns)) or\
-             (include_columns is None and (exclude_columns is not None and prop.key not in exclude_columns))):
-                data[prop.key] = encoder(getattr(self.obj, prop.key))
+                # An object attribute that corresponds to a table column
+                # Public constructor is the orm.column_property() function.
+                if isinstance(prop, orm.properties.ColumnProperty) and\
+                ((include_columns is True or (not include_columns in (None, False) and prop.key in include_columns)) or\
+                 (include_columns is None and (exclude_columns is not None and prop.key not in exclude_columns))):
+                    data[prop.key] = encoder(getattr(self.obj, prop.key))
 
-            # An object property that holds a single item or list of items that
-            # correspond to a related database table.
-            elif isinstance(prop, orm.properties.RelationshipProperty) and\
-            ((include_relations is True or (not include_relations in (None, False) and prop.key in include_relations)) or\
-             (include_relations is None and (exclude_relations is not None and prop.key not in exclude_relations))):
-                obj = getattr(self.obj, prop.key)
+                # An object property that holds a single item or list of items that
+                # correspond to a related database table.
+                elif isinstance(prop, orm.properties.RelationshipProperty) and\
+                ((include_relations is True or (not include_relations in (None, False) and prop.key in include_relations)) or\
+                 (include_relations is None and (exclude_relations is not None and prop.key not in exclude_relations))):
+                    obj = getattr(self.obj, prop.key)
 
-                # A many-to-many relationship (secondary=)
-                if isinstance(obj, orm.collections.InstrumentedList):
-                    data[prop.key] = [self.__class__(i).dict(encoder,
-                                      include_columns=True,
-                                      include_relations=False) for i in obj]
-                elif isinstance(obj, orm.dynamic.AppenderMixin):
-                    # TODO
-                    pass
-                elif isinstance(obj, orm.dynamic.AppenderQuery):
-                    # TODO
-                    pass
-                elif obj is not None:
-                    data[prop.key] = self.__class__(obj).dict(encoder,
-                        include_columns=True, include_relations=False)
+                    # A many-to-many relationship (secondary=)
+                    if isinstance(obj, orm.collections.InstrumentedList):
+                        data[prop.key] = [self.__class__(i).dict(encoder,
+                                          include_columns=True,
+                                          include_relations=False) for i in obj]
+                    elif isinstance(obj, orm.dynamic.AppenderMixin):
+                        # TODO
+                        pass
+                    elif isinstance(obj, orm.dynamic.AppenderQuery):
+                        # TODO
+                        pass
+                    elif obj is not None:
+                        data[prop.key] = self.__class__(obj).dict(encoder,
+                            include_columns=True, include_relations=False)
 
         return data
 
